@@ -1,4 +1,16 @@
 INFO:
 -- OS: MaxOS 1.7
--- python: 2.6.6
+-- python: 2.7
+
+OS DIFFERENCE: if you see
+-- "sh dir is not xXXX": ignore it as it was written in pc, so need to use "dir" cmd to display files, you can simply replace it with "ls" cmd, or even just ignore it
+-- you may also see the directory may not exist: it is cause by that windows use "\", but mac use "/", so just simply change the path in svn_util.py file. 
+
+USAGE: 
+-- update database: python2.7 osgeosvncommits.py checkout -t trunk tags branches -ux true
+---- ux means update xml file, so if you already download all the svn log files, you can set it into false, this step takes large amount of time depending on downloading speed. 
+
+
+
+
 
