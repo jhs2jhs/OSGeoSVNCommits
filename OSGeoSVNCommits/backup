@@ -1,0 +1,236 @@
+def project_history_amount_multiplot_o():
+    global conn
+    #matplotlib.rcParams["figure.subplot.hspace"]=0.9
+    matplotlib.rcParams["figure.subplot.left"]=0.05
+    matplotlib.rcParams["figure.subplot.right"]=0.95
+    matplotlib.rcParams["figure.subplot.top"]=0.95
+    matplotlib.rcParams["figure.subplot.bottom"]=0.05
+    db_query = projects_multii
+    print db_query
+    c = conn.cursor()
+    #c.execute(db_query, (('(\"geoserver\", \"deegree\")'), ))
+    c.execute(db_query,)
+    #fig, axx = plt.subplots(20)
+    #fig = pylab.figure()
+    #fig = plt.figure()
+    fig = plt.figure()
+    #years = matplotlib.dates.YearLocator()
+    #months = matplotlib.dates.MonthLocator()
+    #years = matplotlib.dates.YearLocator()
+    #print fig
+    project_count = 0
+    for row in svn_utils.svn_incubations:
+        if (row["start"] != "") and (row["end"] != ""):
+            project_count = project_count+1
+    j = 0
+    #for row in c:
+    for row in svn_utils.svn_incubations:
+     if (row["start"] != "") and (row["end"] != ""):
+        db_query = project
+        print db_query
+        c = conn.cursor()
+        c.execute(db_query, (row["project"], ))
+        #print row["start"], row["end"]
+        rr = c.fetchone()
+        project_id = rr[0]
+        project_name = rr[1]
+        xs_trunk = []
+        ys_trunk = []
+        i = 1
+        txt = open("./history_svn_counts/project_history_amount_multiplot_o_trunk_"+str(project_id)+"_"+str(project_name)+".txt", "w")
+        out = ("index, \tproject_id , \tproject_name , \tmonth, \tsvn_counts")
+        #print out
+        txt.write(out+"\n")
+        db_query_single = project_trunk_single_amount
+        c_trunk = conn.cursor()
+        c_trunk.execute(db_query_single, (project_id, ))
+        for r in c_trunk:
+            month = r[1]
+            # convert string into datetime
+            month = datetime.strptime(month, '%Y-%m')
+            svn_count = r[2]
+            xs_trunk.append(month)
+            ys_trunk.append(svn_count)
+            #out = (str(i)+", \t"+str(row[0])+" , \t"+str(row[1])+" , \t"+str(row[2])+" , \t"+str(row[3]))
+            out = (str(i)+", \t"+str(r[0])+" , \t"+str(r[1])+" , \t"+str(r[2]))
+            #print out
+            txt.write(out+"\n")
+            i = i + 1
+        txt.close()
+        xs_tag = []
+        ys_tag = []
+        i = 1
+        txt = open("./history_svn_counts/project_history_amount_multiplot_o_tag_"+str(project_id)+"_"+str(project_name)+".txt", "w")
+        out = ("index, \tproject_id , \tproject_name , \tmonth, \tsvn_counts")
+        #print out
+        txt.write(out+"\n")
+        db_query_single = project_tag_single_amount
+        c_tag = conn.cursor()
+        c_tag.execute(db_query_single, (project_id, ))
+        for r in c_tag:
+            month = r[1]
+            # convert string into datetime
+            month = datetime.strptime(month, '%Y-%m')
+            svn_count = r[2]
+            xs_tag.append(month)
+            ys_tag.append(svn_count)
+            #out = (str(i)+", \t"+str(row[0])+" , \t"+str(row[1])+" , \t"+str(row[2])+" , \t"+str(row[3]))
+            out = (str(i)+", \t"+str(r[0])+" , \t"+str(r[1])+" , \t"+str(r[2]))
+            #print out
+            txt.write(out+"\n")
+            i = i + 1
+        txt.close()
+        if (len(ys_trunk)>0 and len(ys_tag)>0):
+            l_trunk = []
+            l_trunk.extend(ys_trunk)
+            l_trunk.sort()
+            l_trunk.reverse()
+            largest_trunk = l_trunk[0]
+            l_tag = []
+            l_tag.extend(ys_tag)
+            l_tag.sort()
+            l_tag.reverse()
+            largest_tag = l_tag[0]
+            print largest_trunk, largest_tag
+            l = largest_trunk / largest_tag
+            ys_tag = [y * l for y in ys_tag]
+            print l
+        '''subplot = axx[j]
+        subplot.plot_date(xs, ys, xdate=True)
+        subplot.set_title(str(project_name))
+        subplot.
+        j = j+1'''
+        #plot_id = project_id+100
+        #print plot_id
+        ax_trunk = fig.add_subplot(project_count, 1, project_count-j)
+        #ax_trunk.plot_date(xs_trunk, ys_trunk, xdate=True, color="blue")
+        #ax_trunk.plot(xs_trunk, ys_trunk, 'bo')
+        width = 0.8
+        ax_trunk.bar(xs_trunk, ys_trunk, width, color='b')
+        #ax_tag = fig.add_subplot(211)
+        #ax_tag = ax_trunk.twinx()
+        #ax_trunk.plot(xs_tag, ys_tag, 'ro')
+        ax_trunk.plot(xs_tag, ys_tag, width, color='r')
+        incubation_start = datetime.strptime(row["start"], '%d/%m/%Y')
+        incubation_end = datetime.strptime(row["end"], '%d/%m/%Y')
+        ax_trunk.axvspan(incubation_start, incubation_end, facecolor='g', alpha=0.5)
+        ax_trunk.set_title(str(project_name))
+        ax_trunk.set_ylabel(str(project_name))
+        #ax_trunk.set_ylabel("world")
+        #ax_trunk.ylabel.tick_right()
+        #ax_trunk.Tick(label1On=False, lable2On=True)
+        ax_trunk.yaxis.set_label_position("right")
+        print type(ax_trunk)
+        #ax_trunk.set_xlim(left="hello", right="world")
+        #ax_tag.plot_date(xs_tag, ys_tag, xdate=True, color="red")
+        #ax.grid(True)
+        #ax.title(str(project_name))
+        #print ys_trunk
+        #print ys_tag
+        j = j+1
+        break
+    c.close()
+    #pylab.show()
+    plt.show()
+    #plt.plot([1,2,3,4])
+    #plt.ylabel('some numbers')
+    #plt.show()
+
+
+
+#svn_paths = []
+svn_projects = [
+    {'project':'deegree',   'root':'trunk',     'svn_path':"https://svn.wald.intevation.org/svn/deegree/base/trunk/"},
+    {'project':'geomajas',  'root':'trunk',     'svn_path':"https://svn.geomajas.org/majas/trunk/"},
+    {'project':'geoserver', 'root':'trunk',     'svn_path':"http://svn.codehaus.org/geoserver/trunk/"},
+    {'project':'mapbender', 'root':'trunk',     'svn_path':"https://svn.osgeo.org/mapbender/trunk/"},
+    {'project':'mapbuilder', 'root':'trunk',    'svn_path':"http://svn.codehaus.org/mapbuilder/trunk/"},
+    {'project':'mapfish',   'root':'mapfish',   'svn_path':"http://www.mapfish.org/svn/mapfish/"},
+    {'project':'mapguide',  'root':'trunk',     'svn_path':"https://svn.osgeo.org/mapguide/trunk/"},
+    {'project':'mapserver', 'root':'trunk',     'svn_path':"http://svn.osgeo.org/mapserver/trunk/"},
+    {'project':'openlayers', 'root':'trunk',    'svn_path':"http://svn.openlayers.org/trunk/"},
+    {'project':'grass',     'root':'trunk',     'svn_path':"https://svn.osgeo.org/grass/grass/trunk/"},
+    {'project':'qgis',      'root':'trunk',     'svn_path':"https://svn.osgeo.org/qgis/trunk/"},
+    {'project':'gvsig',     'root':'trunk',     'svn_path':"http://subversion.gvsig.org/gvSIG/trunk/"},
+    {'project':'fdo',       'root':'trunk',     'svn_path':"http://svn.osgeo.org/fdo/trunk/"},
+    {'project':'gdal',      'root':'trunk',     'svn_path':"http://svn.osgeo.org/gdal/trunk/"},
+    {'project':'geos',      'root':'trunk',     'svn_path':"http://svn.osgeo.org/geos/trunk/"},
+    {'project':'geotools',  'root':'trunk',     'svn_path':"http://svn.osgeo.org/geotools/trunk/"},
+    {'project':'metacrs',   'root':'metacrs',   'svn_path':"http://svn.osgeo.org/metacrs/"},
+    {'project':'ossim',     'root':'trunk',     'svn_path':"http://svn.osgeo.org/ossim/trunk/"},
+    {'project':'postgis',   'root':'trunk',     'svn_path':"http://svn.osgeo.org/postgis/trunk/"},
+    {'project':'geonetwork', 'root':'trunk',    'svn_path':"https://geonetwork.svn.sourceforge.net/svnroot/geonetwork/trunk/"}
+    #{'project':'', 'root':'', 'svn_path':""},
+    #{"project":"mapfish", "root":"reference", "svn_path":"http://www.mapfish.org/svn/mapfish/framework/server/trunk/docs/reference/"}
+    ]
+#svn_deegree = {'project':'deegree', 'root':'test', 'svn_path':"https://svn.wald.intevation.org/svn/deegree/base/trunk/test/"}
+#svn_mapfish= {"project":"mapfish", "reference":"test", "svn_path":"http://www.mapfish.org/svn/mapfish/framework/server/trunk/docs/reference/"}
+
+svn_tags = [
+    {'project':'deegree',   'root':'trunk',     'svn_path':"https://svn.wald.intevation.org/svn/deegree/base/tags/"},
+    {'project':'geomajas',  'root':'trunk',     'svn_path':"https://svn.geomajas.org/majas/tags/"},
+    {'project':'geoserver', 'root':'trunk',     'svn_path':"http://svn.codehaus.org/geoserver/tags/"},
+    {'project':'mapbender', 'root':'trunk',     'svn_path':"https://svn.osgeo.org/mapbender/tags/"},
+    {'project':'mapbuilder', 'root':'trunk',    'svn_path':"http://svn.codehaus.org/mapbuilder/tags/"},
+    #{'project':'mapfish',   'root':'mapfish',   'svn_path':"http://www.mapfish.org/svn/mapfish/"},
+    {'project':'mapguide',  'root':'trunk',     'svn_path':"https://svn.osgeo.org/mapguide/tags/"},
+    {'project':'mapserver', 'root':'trunk',     'svn_path':"http://svn.osgeo.org/mapserver/tags/"},
+    {'project':'openlayers', 'root':'trunk',    'svn_path':"http://svn.openlayers.org/tags/"},
+    {'project':'grass',     'root':'trunk',     'svn_path':"https://svn.osgeo.org/grass/grass/tags/"},
+    {'project':'qgis',      'root':'trunk',     'svn_path':"https://svn.osgeo.org/qgis/tags/"},
+    {'project':'gvsig',     'root':'trunk',     'svn_path':"http://subversion.gvsig.org/gvSIG/tags/"},
+    {'project':'fdo',       'root':'trunk',     'svn_path':"http://svn.osgeo.org/fdo/tags/"},
+    {'project':'gdal',      'root':'trunk',     'svn_path':"http://svn.osgeo.org/gdal/tags/"},
+    {'project':'geos',      'root':'trunk',     'svn_path':"http://svn.osgeo.org/geos/tags/"},
+    {'project':'geotools',  'root':'trunk',     'svn_path':"http://svn.osgeo.org/geotools/tags/"},
+    #{'project':'metacrs',   'root':'metacrs',   'svn_path':"http://svn.osgeo.org/metacrs/"},
+    {'project':'ossim',     'root':'trunk',     'svn_path':"http://svn.osgeo.org/ossim/tags/"},
+    {'project':'postgis',   'root':'trunk',     'svn_path':"http://svn.osgeo.org/postgis/tags/"},
+    {'project':'geonetwork', 'root':'trunk',    'svn_path':"https://geonetwork.svn.sourceforge.net/svnroot/geonetwork/tags/"}
+    ]
+
+svn_branches = [
+    {'project':'deegree',   'root':'trunk',     'svn_path':"https://svn.wald.intevation.org/svn/deegree/base/branches/"},
+    {'project':'geomajas',  'root':'trunk',     'svn_path':"https://svn.geomajas.org/majas/branches/"},
+    {'project':'geoserver', 'root':'trunk',     'svn_path':"http://svn.codehaus.org/geoserver/branches/"},
+    {'project':'mapbender', 'root':'trunk',     'svn_path':"https://svn.osgeo.org/mapbender/branches/"},
+    {'project':'mapbuilder', 'root':'trunk',    'svn_path':"http://svn.codehaus.org/mapbuilder/branches/"},
+    #{'project':'mapfish',   'root':'mapfish',   'svn_path':"http://www.mapfish.org/svn/mapfish/"},
+    {'project':'mapguide',  'root':'trunk',     'svn_path':"https://svn.osgeo.org/mapguide/branches/"},
+    {'project':'mapserver', 'root':'trunk',     'svn_path':"http://svn.osgeo.org/mapserver/branches/"},
+    {'project':'openlayers', 'root':'trunk',    'svn_path':"http://svn.openlayers.org/branches/"},
+    {'project':'grass',     'root':'trunk',     'svn_path':"https://svn.osgeo.org/grass/grass/branches/"},
+    {'project':'qgis',      'root':'trunk',     'svn_path':"https://svn.osgeo.org/qgis/branches/"},
+    {'project':'gvsig',     'root':'trunk',     'svn_path':"http://subversion.gvsig.org/gvSIG/branches/"},
+    {'project':'fdo',       'root':'trunk',     'svn_path':"http://svn.osgeo.org/fdo/branches/"},
+    {'project':'gdal',      'root':'trunk',     'svn_path':"http://svn.osgeo.org/gdal/branches/"},
+    {'project':'geos',      'root':'trunk',     'svn_path':"http://svn.osgeo.org/geos/branches/"},
+    {'project':'geotools',  'root':'trunk',     'svn_path':"http://svn.osgeo.org/geotools/branches/"},
+    #{'project':'metacrs',   'root':'metacrs',   'svn_path':"http://svn.osgeo.org/metacrs/"},
+    {'project':'ossim',     'root':'trunk',     'svn_path':"http://svn.osgeo.org/ossim/branches/"},
+    {'project':'postgis',   'root':'trunk',     'svn_path':"http://svn.osgeo.org/postgis/branches/"},
+    {'project':'geonetwork', 'root':'trunk',    'svn_path':"https://geonetwork.svn.sourceforge.net/svnroot/geonetwork/branches/"}
+    ]
+
+svn_incubations = [
+    {'project':'deegree',   'start':'09/06/2008',     'end':"07/02/2010"},
+    {'project':'geomajas',  'start':'09/03/2010',     'end':"22/11/2010"},
+    {'project':'geoserver', 'start':'01/02/2006',     'end':"11/11/2009"},
+    {'project':'mapbender', 'start':'01/02/2006',     'end':"19/07/2006"},#http://www.geoconnexion.com/uploads/mapbender_intv7i2.pdf
+    {'project':'mapbuilder', 'start':'01/02/2006',    'end':"26/10/2006"},#http://docs.codehaus.org/display/MAP/Strategic+Direction
+    #{'project':'mapfish',   'root':'mapfish',   'end':"11/11/2009"},
+    {'project':'mapguide',  'start':'01/03/2006',     'end':"06/03/2007"},#http://en.wikipedia.org/wiki/MapGuide_Open_Source
+    {'project':'mapserver', 'start':'01/04/2007',     'end':"16/12/2008"},#http://trac.osgeo.org/mapserver/wiki/MapServerHistory
+    {'project':'openlayers', 'start':'25/01/2007',    'end':"16/11/2007"},
+    {'project':'grass',     'start':'01/02/2006',     'end':"12/02/2008"},
+    {'project':'qgis',      'start':'06/03/2007',     'end':"13/03/2008"},
+    {'project':'gvsig',     'start':'07/09/2007',     'end':""},
+    {'project':'fdo',       'start':'06/03/2007',     'end':"12/02/2008"},
+    {'project':'gdal',      'start':'01/02/2006',     'end':"12/02/2008"},
+    {'project':'geos',      'start':'07/11/2007',     'end':""},
+    {'project':'geotools',  'start':'01/02/2006',     'end':"18/07/2008"},
+    #{'project':'metacrs',   'start':'01/09/2008',   'end':""},
+    {'project':'ossim',     'start':'01/02/2006',     'end':"01/06/2009"},
+    {'project':'postgis',   'start':'06/08/2009',     'end':""},
+    {'project':'geonetwork', 'start':'25/01/2007',    'end':"21/06/2008"}
+    ]

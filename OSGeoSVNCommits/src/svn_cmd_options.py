@@ -50,8 +50,8 @@ def cmd_parser():
     svn_utils.cmd_p("\n*******start to parse cmd arguments***********\n")
     #args = parser.parse_args(['checkout', '-t', 'branches', 'trunk', 'tags', '-ux', 'true'])
     #args = parser.parse_args(['checkout', '-t', 'branches', '-ux', 'true'])
-    #args = parser.parse_args(['query','-f', 'true'])
-    args = parser.parse_args()
+    args = parser.parse_args(['query','-f', 'true'])
+    #args = parser.parse_args()
     svn_utils.cmd_p(args)
     args.func(args)
     #return args
@@ -82,8 +82,10 @@ def cmd_checkout(args):
 def cmd_query(args):
     flag = True
     svn_utils.cwd()
-    os.chdir("."+svn_utils.svn_analysis)
+    print svn_utils.pwd(), "hello"
+    svn_utils.svn_db_connect()
     svn_db_query.svn_db_connect()
+    os.chdir("."+svn_utils.svn_analysis)
     print os.getcwd()
     while flag == True:
         message = '''
@@ -96,6 +98,17 @@ def cmd_query(args):
                 5 : specific author temproal for all projects
                 6 : projects => revisions, used for commits history of all projects
                 7 : projects => revisions, used for relase history of all projects
+                8 : how long time in average a personal would sepnd on a project
+                9 : author date project
+                10: project => authors
+                11: project => commits
+                12: project => boundary spanner 
+                13: boundary spanning rate
+                14: project_trunk_history_amount
+                15: project_tag_history_amount
+                16: project_history_amount_multiplot
+                17: project_history_amount_multiplot_year
+                18: project_history_amount_multiplot_dependency
             '''
         x = input (message)
         if x == 0:
@@ -120,9 +133,32 @@ def cmd_query(args):
                 svn_db_query.project_revisions_release_o(type)
             else :
                 print "incorrect input [tags, branches], please try again"
+        elif x == 8:
+            svn_db_query.hong_long_average_on_project_o()
+        elif x == 9:
+            svn_db_query.author_date_project_o()
+        elif x == 10:
+            svn_db_query.project_authors_o()
+        elif x == 11:
+            svn_db_query.project_commits_o()
+        elif x == 13:
+            svn_db_query.boundary_spanning_rate_o()
+        elif x == 12:
+            svn_db_query.project_author_spanning_o()
+        elif x == 14:
+            svn_db_query.project_trunk_history_amount_o()
+        elif x == 15:
+            svn_db_query.project_tag_history_amount_o()
+        elif x == 16:
+            svn_db_query.project_history_amount_multiplot_o()
+        elif x == 17:
+            svn_db_query.project_history_amount_multiplot_year_o()
+        elif x == 18:
+            svn_db_query.project_history_amount_multiplot_dependency_o()
         else:
             print "incorrect selection, pelase choose again"
     svn_db_query.svn_db_close()
+            
             
 
 if __name__ == "__main__":
