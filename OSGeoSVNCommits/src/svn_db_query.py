@@ -82,7 +82,7 @@ def author_projects_count_0():
     c = conn.cursor()
     c.execute(db_query, ) ##
     txt = open("./author_projects_count_0.txt", "w") ##
-    out = ("index, \author_id , \tauthor_name , \tproject_count")
+    out = ("index, \tauthor_id , \tauthor_name , \tproject_count")
     print out
     txt.write(out+"\n")
     i = 1
